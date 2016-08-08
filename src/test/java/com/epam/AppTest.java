@@ -2,13 +2,12 @@ package com.epam;
 
 
 import com.epam.tam.module4.task3.browser.Browser;
-import com.epam.tam.module4.task3.page_object.GoogleHomePage;
-import com.epam.tam.module4.task3.page_object.LipsumHomePage;
+import com.epam.tam.module4.task3.page_object.GooglePages;
+import com.epam.tam.module4.task3.page_object.LipsumPages;
 import com.epam.tam.module4.task3.util.SentanceSeparator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
@@ -16,21 +15,21 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.awt.*;
-
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 
 public class AppTest {
-    // private static final Logger LOG = LogManager.getLogger(AppTest.class);
+    private static final Logger LOG = LogManager.getLogger(AppTest.class);
 
     protected static final String START_URL = "http://lipsum.com/";
 
     protected static RemoteWebDriver driver = Browser.getInstance().getDriver();
-    LipsumHomePage lipsumHomePage = new LipsumHomePage();
-    GoogleHomePage sf = new GoogleHomePage();
+    LipsumPages lp = new LipsumPages();
+    GooglePages sf = new GooglePages();
     JavascriptExecutor js = (JavascriptExecutor) driver;
+    SentanceSeparator ss;
+    Actions act = new Actions(driver);
+
 
     @BeforeClass(description = "Maximize window")
     public void maximizeBrowser() {
@@ -40,94 +39,105 @@ public class AppTest {
 
     @Test()
     public void selectionActions() throws InterruptedException {
+        LOG.info("Stars Actions selection scenario");
 
-        //  LOG.info("Open start page");
-        driver.navigate().to(START_URL);
-        lipsumHomePage.openGeneratedPage();
-        WebElement text = driver.findElement(By.xpath("//div[@id='lipsum']/p[2]"));
-        SentanceSeparator ss;
+        openStartPage();
 
-        Actions act = new Actions(driver);
-
-        String fullText = text.getText();
-
-        ss = new SentanceSeparator(fullText);
+        ss = new SentanceSeparator(lp.getTextOfParagraph());
         int first = ss.getLegthOfSentenceByID(0);
         int second = ss.getLegthOfSentenceByID(1);
 
-        act.moveToElement(text, 0, 0).click().perform();
+        selectTextForActions(lp.secondParagraph(), act, first, second);
+        copySelectionActions(act);
+        openNewTabActions();
+        openGooglePage();
+        runSearchForActions(act);
+        verifyResultsForAction();
+    }
 
+    @Test(description = "JS")
+    public void selectionJS() throws InterruptedException {
+        LOG.info("Stars JS selection scenario");
+
+        openStartPage();
+
+        String text = copyTextFromJS(lp.secondParagraphCSS);
+        openGooglePage();
+
+        runSearchForJS(text);
+        verifyResultforJS();
+
+    }
+
+    public void openStartPage() {
+        LOG.info("Open start page");
+        driver.navigate().to(START_URL);
+        lp.openGeneratedPage();
+    }
+
+    public void copySelectionActions(Actions act) {
+        LOG.info("Copy selection");
+        act.sendKeys(Keys.chord(Keys.CONTROL, "c")).build().perform();
+    }
+
+    public void openNewTabActions() {
+        LOG.info("Open new tab");
+        driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+    }
+
+    public void selectTextForActions(WebElement text, Actions act, int first, int second) {
+        LOG.info("Perform selection");
+        act.moveToElement(text, 0, 0).click().perform();
         act.keyDown(Keys.LEFT_SHIFT);
 
         for (int i = 0; i < first + second; i++) {
-
             act.sendKeys(Keys.ARROW_RIGHT);
         }
 
         act.keyUp(Keys.LEFT_SHIFT);
         act.build().perform();
+    }
 
-
-        //    act.clickAndHold(text).moveToElement(text, first, 0);
-
-        act.sendKeys(Keys.chord(Keys.CONTROL, "c")).build().perform();
-        Thread.sleep(1000);
-
-        //act.sendKeys(Keys.chord(Keys.CONTROL, "c"));
-
-        driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
-        driver.navigate().to("http://google.com");
-        Thread.sleep(2000);
-
-        //       act.click(sf.searchField).sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
-
-     /*   WebElement element = driver.findElement(By.name("q"));
-        element.sendKeys(Keys.chord(Keys.CONTROL, "v"));
-        Thread.sleep(1000);*/
+    public void runSearchForActions(Actions act) throws InterruptedException {
+        LOG.info("Perform search");
 
         act.click(sf.searchField).sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
-
         sf.searchField.submit();
         Thread.sleep(3000);
-
-        Assert.assertTrue(sf.results.isDisplayed(), "error");
     }
 
-    @Test(description = "JS")
-    public void selectionJS() throws InterruptedException {
+    public void verifyResultsForAction() {
+        LOG.info("Perform search");
+        Assert.assertTrue(sf.results.isDisplayed(), "There is no any results");
+    }
 
-        driver.navigate().to(START_URL);
-        lipsumHomePage.openGeneratedPage();
-
-        WebElement paragraph = driver.findElement(By.cssSelector("#lipsum p:nth-child(2)"));
-        String text = copyTextFrom(paragraph);
+    public void openGooglePage() {
+        LOG.info("Open google page");
         driver.navigate().to("google.com");
-        runSearchFor(text);
-        verifyResult();
-
     }
 
 
-    public String copyTextFrom(WebElement element) {
+    public String copyTextFromJS(WebElement element) {
         return js.executeScript(
                 "var text =(arguments[0].innerHTML.toString().split('.')[2]);\n" +
-                        "var selection = window.getSelection();\n" +
-                        "var range = document.createRange();\n" +
-                        "  range.selectNodeContents(arguments[0]);\n" +
+                        " var selection = window.getSelection();\n" +
+                        " var range = document.createRange();\n" +
+                        " range.selectNodeContents(arguments[0]);\n" +
                         " selection.removeAllRanges();\n" +
                         " selection.addRange(range);\n" +
                         " return window.getSelection().toString();", element).toString();
     }
 
-    public void runSearchFor(String text) {
+    public void runSearchForJS(String text) {
+        LOG.info("Perform search");
         js.executeScript("var input = document.getElementById(\"lst-ib\"); \n" +
                 "input.value = arguments[0];\n" +
                 "document.forms[0].submit();", text);
     }
 
-    public void verifyResult() {
-        //js.executeScript("return document.getElementById('resultStats');");
-        assertNotNull(js.executeScript("return document.getElementById('resultStats');"),"Null results");
+    public void verifyResultforJS() {
+        LOG.info("Perform search");
+        assertNotNull(js.executeScript("return document.getElementById('resultStats');"), "There is no any results");
 
     }
 

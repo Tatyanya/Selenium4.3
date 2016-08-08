@@ -4,12 +4,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-/**
- * Created by Tatyana_Korobitsina on 8/5/2016.
- */
-public class GoogleHomePage extends AbstractPage {
+public class GooglePages extends AbstractPage {
 
-    public GoogleHomePage() {
+    public GooglePages() {
         super();
         PageFactory.initElements(this.driver, this);
     }
