@@ -49,7 +49,7 @@ public class AppTest {
 
         selectTextForActions(lp.secondParagraph(), act, first, second);
         copySelectionActions(act);
-        openNewTabActions();
+      //  openNewTabActions();
         openGooglePage();
         runSearchForActions(act);
         verifyResultsForAction();
@@ -113,7 +113,7 @@ public class AppTest {
 
     public void openGooglePage() {
         LOG.info("Open google page");
-        driver.navigate().to("google.com");
+        driver.navigate().to("http://google.com");
     }
 
 
