@@ -14,13 +14,12 @@ public class Browser {
 
     public static Browser getInstance() {
         if (instance == null) {
-           // driver = new FirefoxDriver();
+            driver = new FirefoxDriver();
 
-             File file = new File("./src/main/resources/chromedriver.exe");
+            // File file = new File("d:\TAM\grid\./src/main/resources/chromedriver.exe");
 
-            System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
-            driver = new ChromeDriver();
-
+            // System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
+            // driver = new ChromeDriver();
 
             driver.manage().timeouts().implicitlyWait(IMPLICITY_WAIT, TimeUnit.SECONDS);
             instance = new Browser();

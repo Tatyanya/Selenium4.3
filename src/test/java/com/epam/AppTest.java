@@ -31,7 +31,7 @@ public class AppTest {
     JavascriptExecutor js = (JavascriptExecutor) driver;
     SentanceSeparator ss;
     Actions act = new Actions(driver);
-    String query ;
+    String query;
 
     @BeforeClass(description = "Maximize window")
     public void maximizeBrowser() {
@@ -92,9 +92,8 @@ public class AppTest {
         LOG.info("Perform selection");
         if (driver.getClass().getName().contains("Chrome")) {
             LOG.info("Конченный хром браузер");
-
-            act.sendKeys(Keys.chord(Keys.CONTROL, "f")).sendKeys(str).build().perform();
-Thread.sleep(3000);
+            act.sendKeys(Keys.chord(Keys.CONTROL, "f")).sendKeys(str).sendKeys(Keys.ESCAPE).build().perform();
+            Thread.sleep(3000);
 
         } else if (driver.getClass().equals(FirefoxDriver.class)) {
             act.moveToElement(text, 0, 0).click().perform();
