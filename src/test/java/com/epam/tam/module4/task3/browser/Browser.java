@@ -1,6 +1,7 @@
 package com.epam.tam.module4.task3.browser;
 
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
@@ -13,10 +14,11 @@ public class Browser {
 
     public static Browser getInstance() {
         if (instance == null) {
-            File file = new File("d:\\TAM\\grid\\chromedriver.exe");
+           // driver = new FirefoxDriver();
+
+             File file = new File("./src/main/resources/chromedriver.exe");
 
             System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
-            // driver = new FirefoxDriver();
             driver = new ChromeDriver();
 
 

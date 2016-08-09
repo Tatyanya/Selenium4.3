@@ -8,6 +8,8 @@ import com.epam.tam.module4.task3.util.SentanceSeparator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
@@ -29,7 +31,7 @@ public class AppTest {
     JavascriptExecutor js = (JavascriptExecutor) driver;
     SentanceSeparator ss;
     Actions act = new Actions(driver);
-
+    String query ;
 
     @BeforeClass(description = "Maximize window")
     public void maximizeBrowser() {
@@ -46,10 +48,11 @@ public class AppTest {
         ss = new SentanceSeparator(lp.getTextOfParagraph());
         int first = ss.getLegthOfSentenceByID(0);
         int second = ss.getLegthOfSentenceByID(1);
+        query = ss.getSentencesByID(1).toString();
 
-        selectTextForActions(lp.secondParagraph(), act, first, second);
+        selectTextForActions(lp.secondParagraph(), act, first, second, query);
         copySelectionActions(act);
-      //  openNewTabActions();
+        //  openNewTabActions();
         openGooglePage();
         runSearchForActions(act);
         verifyResultsForAction();
@@ -85,17 +88,26 @@ public class AppTest {
         driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
     }
 
-    public void selectTextForActions(WebElement text, Actions act, int first, int second) {
+    public void selectTextForActions(WebElement text, Actions act, int first, int second, String str) throws InterruptedException {
         LOG.info("Perform selection");
-        act.moveToElement(text, 0, 0).click().perform();
-        act.keyDown(Keys.LEFT_SHIFT);
+        if (driver.getClass().getName().contains("Chrome")) {
+            LOG.info("Конченный хром браузер");
 
-        for (int i = 0; i < first + second; i++) {
-            act.sendKeys(Keys.ARROW_RIGHT);
+            act.sendKeys(Keys.chord(Keys.CONTROL, "f")).sendKeys(str).build().perform();
+Thread.sleep(3000);
+
+        } else if (driver.getClass().equals(FirefoxDriver.class)) {
+            act.moveToElement(text, 0, 0).click().perform();
+            act.keyDown(Keys.LEFT_SHIFT);
+
+            for (int i = 0; i < first + second; i++) {
+                act.sendKeys(Keys.ARROW_RIGHT);
+            }
+
+            act.keyUp(Keys.LEFT_SHIFT);
+            act.build().perform();
         }
 
-        act.keyUp(Keys.LEFT_SHIFT);
-        act.build().perform();
     }
 
     public void runSearchForActions(Actions act) throws InterruptedException {
